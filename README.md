@@ -1,5 +1,7 @@
 GDG Machine learning of Time-serise data study group repository
 
+__WARNING__ Don't push the others branch
+
 Tutorial
 
 Ref : https://nolboo.kim/blog/2013/10/06/github-for-beginner/
