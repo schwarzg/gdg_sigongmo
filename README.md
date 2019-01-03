@@ -1,6 +1,6 @@
 GDG Machine learning of Time-serise data study group repository
 
-Tutorial
+Tutorial\n
 Ref : https://nolboo.kim/blog/2013/10/06/github-for-beginner/
 
 0. Configure user setting
