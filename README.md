@@ -39,3 +39,5 @@ Ref : https://nolboo.kim/blog/2013/10/06/github-for-beginner/
 9. Upload your files to online repository  
 `$ git push origin yourid`  
 
+10. Download from the online repository  
+`$ git pull origin yourid`  
