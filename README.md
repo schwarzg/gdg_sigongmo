@@ -26,8 +26,8 @@ Ref : https://nolboo.kim/blog/2013/10/06/github-for-beginner/
 5. Change the status into your branch  
 `$ git checkout yourid`  
 
-6. Make documents and files  
-`filename.txt`  
+6. Make documents and files. Recommand to make an additional folder named with your id  
+`yourid/filename.txt`  
 
 7. Add file to repository  
 `$ git add filename.txt`  
