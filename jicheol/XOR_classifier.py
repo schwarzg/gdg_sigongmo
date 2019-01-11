@@ -5,9 +5,9 @@ from keras.optimizers import SGD
 
 np.random.seed(0)
 
-#XOR gate
 X = np.array([[0,0],[0,1],[1,0],[1,1]])
-Y = np.array([[0],[1],[1],[0]])
+Y = np.array([[0],[1],[1],[0]]) # XOR gate
+#Y = np.array([[0],[1],[1],[0]]) # OR gate
 
 model = Sequential()
 model.add(Dense(input_dim=2,units=2))
