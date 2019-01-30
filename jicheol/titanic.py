@@ -1,6 +1,7 @@
 import keras
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt 
 from keras.models import Sequential
 from keras.layers import Dense, Activation
 from keras.optimizers import SGD
@@ -43,7 +44,19 @@ model.add(Dense(2,activation='softmax'))
 
 model.compile(loss=categorical_crossentropy,optimizer=SGD(lr=0.01),metrics=['accuracy'])
 
-model.fit(X_train,Y_train,epochs=100,batch_size=20)
+history = model.fit(X_train,Y_train,epochs=500,batch_size=20,verbose=0)
+
+plt.plot(history.history['acc'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.show()
+
+plt.plot(history.history['loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.show()
 
 loss_and_metrics = model.evaluate(X_val,Y_test)
 print(loss_and_metrics)
