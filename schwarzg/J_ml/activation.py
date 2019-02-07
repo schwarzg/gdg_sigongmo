@@ -1,7 +1,7 @@
 import numpy as np
 
 def sig(z):
-	return 1.0/(1.0+np.exp(-z))
+	return 1.0/(1.0+np.exp(np.minimum(-z,30)))
 	
 def sigd(z):
 	sigarr=sig(z)

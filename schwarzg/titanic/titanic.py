@@ -46,11 +46,11 @@ ninp=len(X_t[0])
 ndat=len(Y_t)
 
 #Weight matrix
-W1=np.sqrt(2.0/float(ninp))*np.random.normal(size=(ninp+1,ninp/2)) #W1[0] is for bias
-W2=np.sqrt(4.0/float(ninp))*np.random.normal(size=(ninp/2+1,1)) #W2[0] is for bias
+W1=np.sqrt(2.0/float(ninp))*np.random.normal(size=(ninp+1,100)) #W1[0] is for bias
+W2=np.sqrt(2.0/float(100.0))*np.random.normal(size=(101,1)) #W2[0] is for bias
 
 #hyper parameters
-lr=0.01
+lr=0.001
 
 epoch_num=100000
 perc=epoch_num/100
@@ -81,7 +81,6 @@ for i in range(epoch_num+1):
 
 	if i%perc is 0 :
 		print i, cst[i], acc[i]
-		#print Y
 	if i is epoch_num :
 		break
 	
@@ -95,23 +94,24 @@ for i in range(epoch_num+1):
 	#Adam
 	m1=b1*m1+(1-b1)*gW1
 	v1=b2*v1+(1-b2)*np.square(gW1)	
-	m1_h=m1/(1-b1**i)
-	v1_h=v1/(1-b2**i)
+	m1_h=m1/(1-b1**(i+1))
+	v1_h=v1/(1-b2**(i+1))
 
 	m2=b2*m2+(1-b1)*gW2
 	v2=b2*v2+(1-b2)*np.square(gW2)	
-	m2_h=m2/(1-b1**i)
-	v2_h=v2/(1-b2**i)
+	m2_h=m2/(1-b1**(i+1))
+	v2_h=v2/(1-b2**(i+1))
 	
 	#update
 	W1=W1-lr*np.divide(m1,np.sqrt(v1)+1e-8)
 	W2=W2-lr*np.divide(m2,np.sqrt(v2)+1e-8)
 
+'''
 plt.xlabel("epoch") 
 plt.ylabel("Training accuracy")
 plt.plot(np.arange(epoch_num+1),acc)
 plt.show()
-
+'''
 
 df_te=pd.read_csv("test.csv")
 
