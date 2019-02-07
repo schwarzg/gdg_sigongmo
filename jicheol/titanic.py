@@ -7,6 +7,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Activation
 from keras.optimizers import SGD, Adam
 from keras.losses import binary_crossentropy
+from keras.layers.normalization import BatchNormalization
 
 TrainData = np.array(pd.read_csv('./titanic/train.csv'))
 ValData = np.array(pd.read_csv('./titanic/test.csv'))
@@ -34,15 +35,17 @@ norm = np.array([3.,1.,80.,8.,6.,512.])
 X_train = X_train/norm
 X_val = X_val/norm
 
-n_hidden = 1000
+n_hidden = 500
 
 model = Sequential()
-model.add(Dense(n_hidden,activation='relu'))
+model.add(Dense(n_hidden,kernel_initializer='he_normal'))
+model.add(BatchNormalization())
+model.add(Activation('relu'))
 model.add(Dense(1,activation='sigmoid'))
 
 model.compile(loss=binary_crossentropy,optimizer=Adam(lr=0.001,beta_1=0.9,beta_2=0.999),metrics=['accuracy'])
 
-history = model.fit(X_train,Y_train,epochs=500,batch_size=10,verbose=0,shuffle=True)
+history = model.fit(X_train,Y_train,epochs=100,batch_size=25,verbose=0)
 
 plt.plot(history.history['acc'])
 plt.title('model accuracy')
