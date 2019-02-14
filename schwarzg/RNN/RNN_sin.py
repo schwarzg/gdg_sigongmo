@@ -134,11 +134,11 @@ def num_grad(x,y_t,U,W,V,b,c):
 	
 #define weight matrices, hidden nodes
 hdim=10
-U=np.random.normal(size=(idim,hdim))
-W=np.random.normal(size=(hdim,hdim))
-V=np.random.normal(size=(hdim,idim))
-b=np.random.normal(size=(1,hdim))
-c=np.random.normal(size=(1,idim))
+U=0.01*np.random.normal(size=(idim,hdim))
+W=0.01*np.random.normal(size=(hdim,hdim))
+V=0.01*np.random.normal(size=(hdim,idim))
+b=0.01*np.random.normal(size=(1,hdim))
+c=0.01*np.random.normal(size=(1,idim))
 
 '''
 #gradiend check
@@ -154,7 +154,7 @@ print num_grad(X_tr[:1,:,:],Y_tr[:1,:],U,W,V,b,c)
 
 
 #start learning
-nep=10000
+nep=1000
 percent=nep/100
 lr=0.001
 
