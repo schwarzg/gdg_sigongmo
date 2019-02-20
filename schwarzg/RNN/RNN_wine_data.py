@@ -6,7 +6,7 @@ import itertools
 import nltk
 
 
-vocabulary_size=1000
+vocabulary_size=8000
 unknown_token = "UNKNOWN_TOKEN"
 sentence_start_token = "SENTENCE_START"
 sentence_end_token = "SENTENCE_END"
@@ -50,7 +50,8 @@ print "\nExample sentence: '%s'" % sentences[0]
 print "\nExample sentence after Pre-processing: '%s'" % tokenized_sentences[0]
 
 #One-hot vectorized
+#ind_sent=np.append([[word_to_index[w] for w in sent] for sent in tokenized_sentences],[])
 X_tr=[]
-for setn in tokenized_sentences:
-	X_tr=X_tr+[word_to_index[w] for w in sent]
+for sent in tokenized_sentences:
+	X_tr=X_tr+[word_to_index[w] for w in sent] 
 print X_tr[:1000]
