@@ -21,7 +21,7 @@ train_string=df.str.cat()
 train_string=train_string.decode('utf-8').lower()
 
 # Split full comment into sentences
-sentences=nltk.sent_tokenize(train_string)[:10]
+sentences=nltk.sent_tokenize(train_string)[:3]
 
 # Append SENTENCE_START and SENTENCE_END
 sentences = ["%s %s %s" % (sentence_start_token, x, sentence_end_token) for x in sentences]
@@ -61,17 +61,18 @@ tlen=len(X_tr)
 
 #Preprocess data
 itau=5
+htau=itau
 otau=1
 idim=len(word_to_index)
 print idim
 x_tr=[]
 y_tr=[]
-for i in range(0,tlen-tau):
+for i in range(0,tlen-itau):
 	x_tr.append(X_tr[i:i+itau])
-	y_tr.append(X_tr[i+itau])
+	y_tr.append(X_tr[i+itau+1-otau:i+itau+1])
 X_tr=np.array(x_tr).reshape(len(x_tr),itau)
 Y_tr=np.array(y_tr).reshape(len(y_tr),otau)
-Ndat=len(x_tr)
+Ndat=len(X_tr)
 
 print X_tr.shape
 print Y_tr.shape
@@ -95,24 +96,53 @@ def dact(x):
 	return 1.0-np.square(np.tanh(x))
 
 def softmax(x):
-	shiftx = x - np.max(x)
+	shiftx = x - np.amax(x,axis=(x.ndim-1),keepdims=True)
 	exps = np.exp(shiftx)
-	return exps / np.sum(exps)
+	return np.divide(exps ,np.sum(exps,axis=(x.ndim-1),keepdims=True))
+
+#Must be (Ndim x No). Use it for only one error function
+def dsoftmax(x):
+	S=softmax(x)
+	print x.shape
+	D=[]
+	OD=[]
+	for i in range(len(x)):
+		D.append(np.diag(S[i,:]))	
+		SS=np.array([S[i,:]])
+		OD.append(np.dot(SS.T,SS))
+	D=np.asarray(D)
+	OD=np.asarray(OD)
+	#print D.shape,OD.shape
+	return D-OD
+
+def dsoftmax_s(S):
+	D=[]
+	OD=[]
+	for i in range(len(x)):
+		D.append(np.diag(S[i,:]))	
+		SS=np.array([S[i,:]])
+		OD.append(np.dot(SS.T,SS))
+	D=np.asarray(D)
+	OD=np.asarray(OD)
+	#print D.shape,OD.shape
+	return D-OD
+
+print yo[:,0,:].shape,"dsoftmax return" ,dsoftmax_s(yo[:,0,:]).shape
 
 	
 
 #Feedfoward though time. the dimension of h should satisfy (tlen+1,hidden dim)
 def feedfoward(x,U,W,V,b,c):
 	Ndat=len(x)
-	h=np.zeros((Ndat,tau+1,hdim)) #h[-1]=h[tau] means hidden in t=-1, set to zero
+	h=np.zeros((Ndat,htau+1,hdim)) #h[-1]=h[tau] means hidden in t=-1, set to zero
 	z=np.zeros(h.shape)
-	y=np.zeros((Ndat,1,idim))
-	for i in range(0,tau):
+	y=np.zeros((Ndat,otau,idim))
+	for i in range(0,htau):
 		z[:,i,:]=np.dot(x[:,i,:],U)+np.dot(h[:,i-1,:],W)+b
 		h[:,i,:]=act(z[:,i,:])
 	#print i,"z\n",z
 	#print i,"h\n",h
-	y[:,0,:]=np.dot(h[:,tau-1,:],V)+c
+	y[:,:,:]=softmax(np.dot(h[:,htau-otau:htau,:],V)+c)
 	#print "y\n",y
 	return [y,z,h]
 
@@ -121,27 +151,33 @@ def feedfoward(x,U,W,V,b,c):
 def cost_ms(y,yt):
 	return 0.5*np.mean(np.square(y-yt))
 
+def cost_cs(y,yt):
+	return -np.mean(np.multiply(yt,np.log(y+1E-12)))
+
 
 #Backpropagation through time
 def BPTT(x,yt,U,W,V,b,c):
 	Ndat=len(x)
 	y,z,h=feedfoward(x,U,W,V,b,c)
+	print np.linalg.norm(y),np.linalg.norm(yt)
+	#print "inbtpp", x.shape,yt.shape,y.shape
 	dEdU=np.zeros(U.shape)
 	dEdW=np.zeros(W.shape)
 	dEdV=np.zeros(V.shape)
 	dEdb=np.zeros(b.shape)
 	dEdc=np.zeros(c.shape)
-	del_o=(y-yt)[:,0,:]
-	print del_o.shape
-	t=tau
-	dEdV+=np.dot(h[:,t-1,:].transpose(),del_o)/Ndat
-	dEdc+=np.mean(del_o,axis=0)
-	del_h=np.multiply(np.dot(del_o,V.transpose()),1-h[:,t-1,:]**2)
-	for i in range(t)[::-1]:
-		dEdW+=np.dot(h[:,i-1,:].transpose(),del_h)/Ndat
-		dEdU+=np.dot(x[:,i,:].transpose(),del_h)/Ndat
-		dEdb+=np.mean(del_h,axis=0)
-		del_h=np.multiply(np.dot(del_h,W.transpose()),1-h[:,i-1,:]**2)
+	for t in range(htau-otau,htau)[::-1]: # t-1,t-2,t-3, .....
+		#print dsoftmax_s(y[:,htau-1-t,:]).shape
+		del_o=np.matmul(np.divide(yt[:,htau-1-t:htau-t,:],y[:,htau-1-t:htau-t,:]),dsoftmax_s(y[:,htau-1-t,:]))[:,0,:]
+		print "del_o shape", del_o.shape, del_o
+		dEdV+=np.dot(h[:,t,:].transpose(),del_o)/Ndat
+		dEdc+=np.mean(del_o,axis=0)
+		del_h=np.multiply(np.dot(del_o,V.transpose()),1-h[:,t,:]**2)
+		for i in range(t)[::-1]:
+			dEdW+=np.dot(h[:,i-1,:].transpose(),del_h)/Ndat
+			dEdU+=np.dot(x[:,i,:].transpose(),del_h)/Ndat
+			dEdb+=np.mean(del_h,axis=0)
+			del_h=np.multiply(np.dot(del_h,W.transpose()),1-h[:,i-1,:]**2)
 	return [dEdU,dEdW,dEdV,dEdb,dEdc]
 
 #Check gradient
@@ -155,7 +191,7 @@ def num_grad(x,y_t,U,W,V,b,c):
 	ngb=np.zeros_like(b)	
 	ngc=np.zeros_like(c)
 
-	d=1e-5
+	d=1e-12
 	for (i,j), v in np.ndenumerate(U):
 		dU=np.array(U)
 		dU[i,j]=v+d
@@ -192,21 +228,27 @@ def num_grad(x,y_t,U,W,V,b,c):
 
 	
 #define weight matrices, hidden nodes
-hdim=idim*2
-U=0.01*np.random.normal(size=(idim,hdim))
-W=0.01*np.random.normal(size=(hdim,hdim))
-V=0.01*np.random.normal(size=(hdim,idim))
-b=0.01*np.random.normal(size=(1,hdim))
-c=0.01*np.random.normal(size=(1,idim))
+hdim=idim
+U=np.random.normal(size=(idim,hdim))
+W=np.random.normal(size=(hdim,hdim))
+V=np.random.normal(size=(hdim,idim))
+b=np.random.normal(size=(1,hdim))
+c=np.random.normal(size=(1,idim))
 
 y,z,h=feedfoward(xo,U,W,V,b,c)
 print "AfterFeedFoward", y.shape,z.shape,h.shape
+print cost_cs(y,yo)
 
 #gradiend check
 #y,_,_=feedfoward(ohe(X_tr[:1,:]),U,W,V,b,c)
 Q,W,E,R,T=BPTT(xo,yo,U,W,V,b,c)
 QQ,WW,EE,RR,TT=num_grad(xo,yo,U,W,V,b,c)
-print np.sum(Q-QQ),np.sum(W-WW),np.sum(E-EE),np.sum(R-RR),np.sum(T-TT)
+print Q,QQ
+print W,WW
+print E,EE
+print R,RR
+print T,TT
+print np.linalg.norm(Q-QQ),np.linalg.norm(W-WW),np.linalg.norm(E-EE),np.linalg.norm(R-RR),np.linalg.norm(T-TT)
 
 
 
@@ -302,9 +344,9 @@ plt.show()
 
 #Test
 Ndat=1
-Y_ts=X_tr[0,:,:].reshape(tau)
-for i in np.arange(0,tlen-tau):
-	X_ts=Y_ts[i:i+tau].reshape(1,tau,idim)
+Y_ts=X_tr[0,:,:].reshape(itau)
+for i in np.arange(0,tlen-itau):
+	X_ts=Y_ts[i:i+itau].reshape(1,itau,idim)
 	y,_,_=feedfoward(X_ts,U,W,V,b,c)
 	Y_ts=np.append(Y_ts,y)
 
