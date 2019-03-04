@@ -23,7 +23,7 @@ train_string=df.str.cat()
 train_string=train_string.decode('utf-8').lower()
 
 # Split full comment into sentences
-sentences=nltk.sent_tokenize(train_string)[:3]
+sentences=nltk.sent_tokenize(train_string)[:50]
 
 # Append SENTENCE_START and SENTENCE_END
 sentences = ["%s %s %s" % (sentence_start_token, x, sentence_end_token) for x in sentences]
@@ -61,7 +61,7 @@ tlen=len(X_tr)
 
 #Preprocess data
 idim=len(word_to_index)
-itau=5
+itau=20
 htau=itau
 otau=1
 print idim
@@ -86,15 +86,16 @@ def ohe(x,vsize):
 
 X_tr=ohe(X_tr,idim)
 Y_tr=ohe(Y_tr,idim)
+Y_tr=Y_tr[:,0,:]
 
 telen=int(Ndat*0.1)
 X_val=X_tr[:telen,:,:]
-Y_val=Y_tr[:telen,:,:]
+Y_val=Y_tr[:telen,:]
 
 X_tr=X_tr[telen:,:,:]
-Y_tr=Y_tr[telen:,:,:]
+Y_tr=Y_tr[telen:,:]
 
-hdim=idim
+hdim=idim*2
 
 model=Sequential()
 model.add(SimpleRNN(hdim,init='lecun_normal',input_shape=(itau,idim)))
