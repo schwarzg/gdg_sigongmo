@@ -53,7 +53,7 @@ def slipt_sentences(raw): # dot(.)으로 문장을 분류
 for raw in data_discrip2: # description에서 문장 추출
     if len(raw)>0:
         sentences2.append(slipt_sentences(raw))
-for i, sentence in enumerate(sentences2): # 문장에서 단어 
+for i, sentence in enumerate(sentences2): # 문장에서 단어 추출
     sentences2[i] = ' '.join(sent_one_discrip for sent_one_discrip in sentences2[i])
 # # print(' '.join(sentence for sentence in sentences2[1]))
 # print(sentences2[1])
