@@ -63,7 +63,7 @@ def sentence_to_wordlist(raw): # 문장에서 단어 추출
     words = clean.split()
     return words
 
-for raw in sentences2: # description에서 문장 추출
+for raw in sentences2: # description에서  추출
     if len(raw)>0:
         sentences.append(sentence_to_wordlist(raw))
 
