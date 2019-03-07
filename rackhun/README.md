@@ -9,5 +9,5 @@ Ref : 정석으로 배우는 딥러닝 (위키북스)
 4. Titanic (Kaggle) [2/7] 
 
 Presentation : Encoder & Decoder [3/7]
-	       Manifold Visualization with MNIST
-	       Exercise 6.2.2 
+- Manifold Visualization with MNIST
+- Exercise 6.2.2 
